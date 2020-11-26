@@ -19,7 +19,7 @@ bot = commands.Bot(command_prefix='!')
     brief='Tirada dado de estrés (ej. !stress)',
     help='El bot te mostrará un resultado aleatorio entre 0 (pifia) y 9'
 )
-async def roll(ctx):
+async def stress_roll(ctx):
     multiplicador = 1
     tiradas = []
 
@@ -50,7 +50,7 @@ async def roll(ctx):
     brief='Tirada de dados poliédricos (ej. !dados 2d8)',
     help='Introduce tras !dados los dadosque quieras tirar, por ejemplo 1d10 será igual a tirar un dado de diez caras'
 )
-async def roll(ctx, dados_poliedricos: str):
+async def dice_roll(ctx, dados_poliedricos: str):
     dados = [
         str(random.choice(range(1, int(dados_poliedricos.split("d")[1]) + 1)))
         for _ in range(int(dados_poliedricos.split("d")[0]))
@@ -65,7 +65,7 @@ async def roll(ctx, dados_poliedricos: str):
     brief='Tirada dado simple (ej. !simple)',
     help='El bot te mostrará un resultado aleatorio entre 0 y 9'
 )
-async def roll(ctx):
+async def simple_roll(ctx):
     dado_simple = str(random.choice(range(0, 10)))
     await ctx.send(f'```DADO SIMPLE: {dado_simple}\n```{ctx.author.mention}')
 
@@ -76,7 +76,7 @@ async def roll(ctx):
     help='Introduce tras !pifia los dados de pifia que quieras tirar, por ejemplo 1 '
          'será igual a tirar un dado de diez caras'
 )
-async def roll(ctx, dados_pifia: str):
+async def botch_roll(ctx, dados_pifia: str):
     dado_pifia = [
         str(random.choice(range(0, 10)))
         for _ in range(int(dados_pifia))
@@ -99,7 +99,7 @@ async def roll(ctx, dados_pifia: str):
     brief='Tirada de envejecimiento (ej. !envejecimiento -4)',
     help='Añade el modificador a la tirada de envejecimiento para saber el resultado, por ejemplo !envejecimiento -12'
 )
-async def roll(ctx, modificador_envejecimiento: str):
+async def aging_roll(ctx, modificador_envejecimiento: str):
     multiplicador = 1
     tiradas = []
     while True:
@@ -155,7 +155,7 @@ async def roll(ctx, modificador_envejecimiento: str):
     brief='Tirada de crisis por envejecimiento (ej. !crisis +4)',
     help='DADO SIMPLE + EDAD/10 (redondeando hacia arriba) + PUNTUACIÓN DECREPITUD'
 )
-async def roll(ctx, modificador_crisis: str):
+async def crisis_roll(ctx, modificador_crisis: str):
     dado_simple = random.choice(range(0, 10))
     total_crisis = int(modificador_crisis.split("+")[1]) + dado_simple
     if total_crisis <= 8:
