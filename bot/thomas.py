@@ -16,12 +16,14 @@ bot = commands.Bot(command_prefix='!')
 
 @bot.command(
     name='stress',
-    brief='Tirada dado de estrés (ej. !stress)',
-    help='El bot te mostrará un resultado aleatorio entre 0 (pifia) y 9'
+    brief='Tirada dado de estrés (ej. !stress o !stress +5)',
+    help='El bot te mostrará un resultado aleatorio entre 0 y 9 y le sumará el bono introducido'
 )
-async def stress_roll(ctx):
+async def roll(ctx, *args):
     multiplicador = 1
     tiradas = []
+    bono = 0
+    operador = "+"
 
     while True:
         if multiplicador > 1:
@@ -35,14 +37,26 @@ async def stress_roll(ctx):
             tiradas = tiradas + [resultado]
             break
     total_stress = tiradas[-1] * multiplicador
+    for arg in args:
+        if "-" in arg:
+            operador = "-"
+        if arg is None:
+            bono = 0
+        else:
+            bono = int(arg.replace(" ","").split(operador)[1])
+
+    if operador == "+":
+        total_suma = bono + int(total_stress)
+    else:
+        total_suma = int(total_stress) - bono
 
     if 0 in tiradas:
-        dice = '***¡PIFIA!***\n\n'
+        dice = '***¡POSIBLE PIFIA!***\n\n'
     elif 1 in tiradas:
         dice = '***¡CRÍTICO!***\n\n'
     else:
         dice = ''
-    await ctx.send(f'```{dice}TOTAL ESTRÉS: {total_stress}\nTIRADAS DADOS: {tiradas}\n```{ctx.author.mention}')
+    await ctx.send(f'```ini\n{dice}TOTAL DE ESTRÉS: {total_suma}\nOPERACIÓN: [{total_stress} {operador} {bono}]\nTIRADAS DE DADOS: {tiradas}```{ctx.author.mention}')
 
 
 @bot.command(
@@ -50,24 +64,42 @@ async def stress_roll(ctx):
     brief='Tirada de dados poliédricos (ej. !dados 2d8)',
     help='Introduce tras !dados los dadosque quieras tirar, por ejemplo 1d10 será igual a tirar un dado de diez caras'
 )
-async def dice_roll(ctx, dados_poliedricos: str):
-    dados = [
+async def roll(ctx, dados_poliedricos: str):
+    dice = [
         str(random.choice(range(1, int(dados_poliedricos.split("d")[1]) + 1)))
         for _ in range(int(dados_poliedricos.split("d")[0]))
         ]
-    dados.sort()
-    dados = ', '.join(dados)
-    await ctx.send(f'```{dados}\n```{ctx.author.mention}')
+    dice.sort()
+    dice = ', '.join(dice)
+    await ctx.send(f'```{dice}```{ctx.author.mention}')
 
 
 @bot.command(
     name='simple',
-    brief='Tirada dado simple (ej. !simple)',
-    help='El bot te mostrará un resultado aleatorio entre 0 y 9'
+    brief='Tirada dado simple (ej. !simple o !simple +5)',
+    help='El bot te mostrará un resultado aleatorio entre 0 y 9 y le sumará el bono introducido'
 )
-async def simple_roll(ctx):
-    dado_simple = str(random.choice(range(0, 10)))
-    await ctx.send(f'```DADO SIMPLE: {dado_simple}\n```{ctx.author.mention}')
+async def roll(ctx, *args):
+    bono = 0
+    operador = "+"
+    for arg in args:
+        if "-" in arg:
+            operador = "-"
+        if arg is None:
+            bono = 0
+        else:
+            bono = int(arg.replace(" ","").split(operador)[1])
+    dice = [
+        str(random.choice(range(0, 10)))
+        ]
+    dice.sort()
+    dice = ', '.join(dice)
+    if operador == "+":
+        total_suma = int(dice) + bono
+    else:
+        total_suma = int(dice) - bono
+
+    await ctx.send(f'```TOTAL SIMPLE: {total_suma}\nOPERACIÓN: [{dice} {operador} {bono}]\nTIRADA DE DADO: {dice}```{ctx.author.mention}')
 
 
 @bot.command(
@@ -76,30 +108,30 @@ async def simple_roll(ctx):
     help='Introduce tras !pifia los dados de pifia que quieras tirar, por ejemplo 1 '
          'será igual a tirar un dado de diez caras'
 )
-async def botch_roll(ctx, dados_pifia: str):
-    dado_pifia = [
+async def roll(ctx, dados_pifia: str):
+    dice = [
         str(random.choice(range(0, 10)))
         for _ in range(int(dados_pifia))
     ]
-    dado_pifia.sort()
+    dice.sort()
     pifias = 0
     has_pifiado = ''
-    for d in dado_pifia:
+    for d in dice:
         if d == '0':
             pifias += 1
             has_pifiado = '*** ¡PIFIASTE! ***\n\n'
         else:
             continue
-    dado_pifia = has_pifiado + 'DADOS DE PIFIA: ' + ', '.join(dado_pifia) + '\n(CEROS SACADOS: ' + str(pifias) + ')'
-    await ctx.send(f'```{dado_pifia}\n```{ctx.author.mention}')
+    dice = has_pifiado + 'DADOS DE PIFIA: ' + ', '.join(dice) + '\n(CEROS SACADOS: ' + str(pifias) + ')'
+    await ctx.send(f'```fix\n{dice}```{ctx.author.mention}')
 
-
+    
 @bot.command(
     name='envejecimiento',
     brief='Tirada de envejecimiento (ej. !envejecimiento -4)',
     help='Añade el modificador a la tirada de envejecimiento para saber el resultado, por ejemplo !envejecimiento -12'
 )
-async def aging_roll(ctx, modificador_envejecimiento: str):
+async def roll(ctx, modificador_envejecimiento: str):
     multiplicador = 1
     tiradas = []
     while True:
@@ -123,31 +155,31 @@ async def aging_roll(ctx, modificador_envejecimiento: str):
     elif total_env < 10:
         resultado_env = 'La edad aparente aumenta un año.'
     elif total_env < 13:
-        resultado_env = 'Gana 1 Punto de Envejecimiento en cualquier Característica.'
+        resultado_env = 'Gana un punto de envejecimiento en cualquier Característica.'
     elif total_env == 13:
-        resultado_env = 'Gana los suficientes Puntos de Envejecimiento (en cualquier Característica) ' \
+        resultado_env = 'Gana los suficientes puntos de envejecimiento (en cualquier Característica) ' \
                         'para alcanzar el siguiente nivel en Decrepitud, y sufre una Crisis.'
     elif total_env == 14:
-        resultado_env = 'Gana 1 Punto de Envejecimiento en Rapidez.'
+        resultado_env = 'Gana un punto de envejecimiento en Rapidez.'
     elif total_env == 15:
-        resultado_env = 'Gana 1 Punto de Envejecimiento en Vitalidad.'
+        resultado_env = 'Gana un punto de envejecimiento en Vitalidad.'
     elif total_env == 16:
-        resultado_env = 'Gana 1 Punto de Envejecimiento en Percepcion.'
+        resultado_env = 'Gana un punto de envejecimiento en Percepcion.'
     elif total_env == 17:
-        resultado_env = 'Gana 1 Punto de Envejecimiento en Presencia.'
+        resultado_env = 'Gana un punto de envejecimiento en Presencia.'
     elif total_env == 18:
-        resultado_env = 'Gana 1 Punto de Envejecimiento en Fuerza y Vitalidad.'
+        resultado_env = 'Gana un punto de envejecimiento en Fuerza y Vitalidad.'
     elif total_env == 19:
-        resultado_env = 'Gana 1 Punto de Envejecimiento en Destreza y Rapidez.'
+        resultado_env = 'Gana un punto de envejecimiento en Destreza y Rapidez.'
     elif total_env == 20:
-        resultado_env = 'Gana 1 Punto de Envejecimiento en Comunicación y Presencia.'
+        resultado_env = 'Gana un punto de envejecimiento en Comunicación y Presencia.'
     elif total_env == 21:
-        resultado_env = 'Gana 1 Punto de Envejecimiento en Inteligencia y Percepción.'
+        resultado_env = 'Gana un punto de envejecimiento en Inteligencia y Percepción.'
     else:
-        resultado_env = 'Gana los suficientes Puntos de Envejecimiento (en cualquier Característica) ' \
+        resultado_env = 'Gana los suficientes puntos de envejecimiento (en cualquier Característica) ' \
                         'para alcanzar el siguiente nivel en Decrepitud, y sufre una Crisis.'
 
-    await ctx.send(f'```{resultado_env}\nTOTAL ENVEJECIMIENTO: {total_env}\nTIRADAS DE DADOS: {tiradas}\n```{ctx.author.mention}')
+    await ctx.send(f'```{resultado_env}\nTOTAL DE ENVEJECIMIENTO: {total_env}\nTIRADAS DE DADOS: {tiradas}```{ctx.author.mention}')
 
 
 @bot.command(
@@ -155,7 +187,7 @@ async def aging_roll(ctx, modificador_envejecimiento: str):
     brief='Tirada de crisis por envejecimiento (ej. !crisis +4)',
     help='DADO SIMPLE + EDAD/10 (redondeando hacia arriba) + PUNTUACIÓN DECREPITUD'
 )
-async def crisis_roll(ctx, modificador_crisis: str):
+async def roll(ctx, modificador_crisis: str):
     dado_simple = random.choice(range(0, 10))
     total_crisis = int(modificador_crisis.split("+")[1]) + dado_simple
     if total_crisis <= 8:
@@ -173,6 +205,6 @@ async def crisis_roll(ctx, modificador_crisis: str):
     else:
         resultado_crisis = 'Enfermedad terminal. Necesita de CrCo 40 para sobrevivir.'
 
-    await ctx.send(f'```{resultado_crisis}\nTOTAL CRISIS: {total_crisis}\nTIRADA DE DADOS: {dado_simple}\n```{ctx.author.mention}')
+    await ctx.send(f'```diff\n-{resultado_crisis}\n\nTOTAL DE CRISIS: {total_crisis}\nTIRADA DE DADOS: {dado_simple}```{ctx.author.mention}')
 
 bot.run(TOKEN)
