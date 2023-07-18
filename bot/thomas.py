@@ -215,4 +215,66 @@ async def roll(ctx, modificador_crisis: str):
 
     await ctx.send(f'```diff\n-{resultado_crisis}\n\nTOTAL DE CRISIS: {total_crisis}\nTIRADA DE DADOS: {dado_simple}```{ctx.author.mention}')
 
+# TBC
+@bot.command(
+    name='confianza',
+    brief='Comprobación de la confianza actual o gasto de confianza',
+    help='El bot mostrará la confianza del último año de la partida o gastará la confianza usada durante una tirada (e.g., !confianza Almasterin -1)'
+)
+async def confianza(ctx, *, argumento):
+    # Establecer conexión con la base de datos
+    connection = psycopg2.connect(
+        host='HOST_IP',
+        database='POSTGRES_DATABASE',
+        user='POSTGRES_USERNAME',
+        password='POSTGRES_PASSWORD'
+    )
+
+    # Cursor para interactuar con la BBDD
+    cursor = connection.cursor()
+
+    argumentos = argumento.split()
+    personaje = ' '.join(argumentos[:-1])
+    gasto_str = argumentos[-1]
+
+    # Gastar confianza
+    if gasto_str.startswith('-'):
+        try:
+            gasto = int(gasto_str[1:])
+        except ValueError:
+            await ctx.send(f"Valor de gasto no válido: {gasto_str[1:]}.")
+            return
+
+        # Actualiza la BBDD
+        cursor.execute("""
+            UPDATE Confianza 
+            SET gasto = gasto + %s, totales = totales - %s
+            WHERE año = (SELECT MAX(año) FROM Confianza WHERE personaje_id = (SELECT id FROM Personajes WHERE nombre = %s))
+            AND personaje_id = (SELECT id FROM Personajes WHERE nombre = %s)
+        """, (gasto, gasto, personaje, personaje))
+
+        connection.commit()
+
+        await ctx.send(f"Se gastaron {gasto} puntos de confianza para el personaje {personaje}.")
+
+    else:
+        # Realiza la consulta SQL
+        cursor.execute("""
+            SELECT totales FROM Confianza 
+            WHERE personaje_id = (SELECT id FROM Personajes WHERE nombre = %s) 
+            ORDER BY año DESC
+            LIMIT 1
+        """, (personaje,))
+
+        # Muestra la consulta
+        result = cursor.fetchone()
+
+        if result is None:
+            await ctx.send(f"No se encontró confianza para el personaje {personaje}.")
+        else:
+            await ctx.send(f"La confianza total para {personaje} en el último año es {result[0]}.")
+
+    # Cierra conexión
+    connection.close()
+
 bot.run(TOKEN)
