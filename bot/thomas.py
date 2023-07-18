@@ -4,6 +4,7 @@ import random
 import discord
 from dotenv import load_dotenv
 from discord.ext import commands
+import psycopg2
 
 
 load_dotenv()
@@ -13,6 +14,13 @@ client = discord.Client()
 member = discord.Member
 bot = commands.Bot(command_prefix='!')
 
+@bot.event
+async def on_ready():
+    print(f'{bot.user.name} has connected to Discord!')
+
+@bot.event
+async def on_command_error(ctx, error):
+    await ctx.send(f'An error occurred: {str(error)}')
 
 @bot.command(
     name='stress',
