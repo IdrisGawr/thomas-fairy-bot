@@ -238,8 +238,12 @@ async def confianza(ctx, *, argumento):
     cursor = connection.cursor()
 
     argumentos = argumento.split()
-    personaje = ' '.join(argumentos[:-1])
-    gasto_str = argumentos[-1]
+    if argumentos[-1].startswith('-'):
+        gasto_str = argumentos[-1]
+        personaje = ' '.join(argumentos[:-1])
+    else:
+        gasto_str = '0'
+        personaje = ' '.join(argumentos)
 
     # Gastar confianza
     if gasto_str.startswith('-'):
