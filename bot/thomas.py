@@ -289,12 +289,22 @@ async def confianza(ctx, *, argumento):
     cursor = connection.cursor()
 
     argumentos = argumento.split()
-    if argumentos[-1].startswith("-"):
+    if argumentos[-1].startswith('-'):
         gasto_str = argumentos[-1]
-        personaje = " ".join(argumentos[:-1])
+        personaje = ' '.join(argumentos[:-1])
+        columna = "gasto" # asumir por defecto que el gasto afecta a la columna "gasto"
+    elif argumentos[-1].startswith('+'):
+        gasto_str = argumentos[-1]
+        personaje = ' '.join(argumentos[:-2])
+        columna = argumentos[-2]  # la columna será la penúltima palabra en los argumentos
+        if columna not in ["anuales", "resumenes", "otros"]:
+            await ctx.send(f"Columna no válida: {columna}.")
+            connection.close()
+            return
     else:
-        gasto_str = "0"
-        personaje = " ".join(argumentos)
+        gasto_str = '0'
+        personaje = ' '.join(argumentos)
+        columna = None
 
     # Gastar confianza
     if gasto_str.startswith("-"):
@@ -349,7 +359,7 @@ async def confianza(ctx, *, argumento):
                 (SELECT id FROM selected_personaje)
             )
             UPDATE Confianza
-            SET gasto = gasto + %s, totales = totales - %s
+            SET gasto = COALESCE(gasto, 0) + %s, totales = COALESCE(totales, 0) - %s
             WHERE año = (SELECT año FROM max_year)
             AND personaje_id = (SELECT id FROM selected_personaje)
         """,
@@ -362,6 +372,33 @@ async def confianza(ctx, *, argumento):
             f"{personaje}, has gastado {gasto} punto de la confianza de "
             f"Ancaelius. Úsalo bien."
         )
+
+    elif gasto_str.startswith("+"):
+        try:
+            gasto = int(gasto_str[1:])
+        except ValueError:
+            await ctx.send(f"Valor de gasto no válido: {gasto_str[1:]}.")
+            return
+
+        # Actualiza la BBDD
+        query = """
+            WITH selected_personaje AS (
+               SELECT id FROM Personajes WHERE nombre = %s
+            ),
+            max_year AS (
+                SELECT MAX(año) AS año FROM Confianza WHERE personaje_id = (SELECT id FROM selected_personaje)
+            )
+            UPDATE Confianza
+            SET {} = COALESCE({}, 0) + %s, totales = COALESCE(totales, 0) + %s
+            WHERE año = (SELECT año FROM max_year)
+            AND personaje_id = (SELECT id FROM selected_personaje)
+        """.format(columna, columna)
+
+        cursor.execute(query, (personaje, gasto, gasto))
+
+        connection.commit()
+
+        await ctx.send(f"Se añadieron {gasto} puntos de confianza al personaje {personaje}.")
 
     else:
         # Realiza la consulta SQL
