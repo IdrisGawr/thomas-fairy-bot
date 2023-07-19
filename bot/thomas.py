@@ -9,6 +9,10 @@ import psycopg2
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
+IP = os.getenv('HOST_IP')
+DATABASE = os.getenv('POSTGRES_DATABASE')
+USERNAME = os.getenv('POSTGRES_USERNAME')
+PASSWORD = os.getenv('POSTGRES_PASSWORD')
 
 client = discord.Client()
 member = discord.Member
@@ -224,10 +228,10 @@ async def roll(ctx, modificador_crisis: str):
 async def confianza(ctx, *, argumento):
     # Establecer conexión con la base de datos
     connection = psycopg2.connect(
-        host='HOST_IP',
-        database='POSTGRES_DATABASE',
-        user='POSTGRES_USERNAME',
-        password='POSTGRES_PASSWORD'
+        host=IP,
+        database=DATABASE,
+        user=USERNAME,
+        password=PASSWORD
     )
 
     # Cursor para interactuar con la BBDD
