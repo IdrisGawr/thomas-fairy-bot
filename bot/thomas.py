@@ -251,6 +251,7 @@ async def confianza(ctx, *, argumento):
             gasto = int(gasto_str[1:])
         except ValueError:
             await ctx.send(f"Valor de gasto no válido: {gasto_str[1:]}.")
+            connection.close()
             return
 
         # Actualiza la BBDD
