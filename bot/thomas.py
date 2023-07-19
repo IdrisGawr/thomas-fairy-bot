@@ -251,11 +251,17 @@ async def confianza(ctx, *, argumento):
 
         # Actualiza la BBDD
         cursor.execute("""
-            UPDATE Confianza 
+            WITH selected_personaje AS (
+               SELECT id FROM Personajes WHERE nombre = %s
+            ),
+            max_year AS (
+                SELECT MAX(año) AS año FROM Confianza WHERE personaje_id = (SELECT id FROM selected_personaje)
+            )
+            UPDATE Confianza
             SET gasto = gasto + %s, totales = totales - %s
-            WHERE año = (SELECT MAX(año) FROM Confianza WHERE personaje_id = (SELECT id FROM Personajes WHERE nombre = %s))
-            AND personaje_id = (SELECT id FROM Personajes WHERE nombre = %s)
-        """, (gasto, gasto, personaje, personaje))
+            WHERE año = (SELECT año FROM max_year)
+            AND personaje_id = (SELECT id FROM selected_personaje)
+        """, (personaje, gasto, gasto))
 
         connection.commit()
 
