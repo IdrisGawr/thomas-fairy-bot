@@ -254,6 +254,29 @@ async def confianza(ctx, *, argumento):
             connection.close()
             return
 
+        # Verifica que el gasto no sea mayor a 1
+        if gasto > 1:
+            await ctx.send(f"Si no eres Ancaelius, no puedes gastar su confianza de golpe. "
+                           "Si eres Ancaelius, ejecuta este comando tantas veces como quieras (bueno hasta tres, todos tenemos límites).")
+            connection.close()
+            return
+
+        # Realiza la consulta SQL para obtener confianza actual
+        cursor.execute("""
+            SELECT totales FROM Confianza 
+            WHERE personaje_id = (SELECT id FROM Personajes WHERE nombre = %s) 
+            ORDER BY año DESC
+            LIMIT 1
+        """, (personaje,))
+
+        # Muestra la consulta
+        result = cursor.fetchone()
+            
+        # Verifica si no hay confianza o si la confianza es insuficiente
+        if result is None or result[0] <= 0:
+            await ctx.send(f"{personaje}, has perdido la confianza de Ancaelius...")
+            connection.close()
+            return
         # Actualiza la BBDD
         cursor.execute("""
             WITH selected_personaje AS (
@@ -270,7 +293,7 @@ async def confianza(ctx, *, argumento):
 
         connection.commit()
 
-        await ctx.send(f"Se gastaron {gasto} puntos de confianza para el personaje {personaje}.")
+        await ctx.send(f"{personaje}, has gastado {gasto} punto de la confianza de Ancaelius. Úsalo bien.")
 
     else:
         # Realiza la consulta SQL
