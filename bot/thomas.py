@@ -31,7 +31,8 @@ async def on_command_error(ctx, error):
 @bot.command(
     name="stress",
     brief="Tirada dado de estrés (ej. !stress o !stress +5)",
-    help="El bot te mostrará un resultado aleatorio entre 0 y 9 y le sumará el bono introducido",
+    help="El bot te mostrará un resultado aleatorio entre 0 y 9 y le sumará "
+    "el bono introducido",
 )
 async def roll(ctx, *args):
     multiplicador = 1
@@ -71,14 +72,17 @@ async def roll(ctx, *args):
     else:
         dice = ""
     await ctx.send(
-        f"```ini\n{dice}TOTAL DE ESTRÉS: {total_suma}\nOPERACIÓN: [{total_stress} {operador} {bono}]\nTIRADAS DE DADOS: {tiradas}```{ctx.author.mention}"
+        f"```ini\n{dice}TOTAL DE ESTRÉS: {total_suma}\nOPERACIÓN: "
+        f"[{total_stress} {operador} {bono}]\nTIRADAS DE DADOS: "
+        f"{tiradas}```{ctx.author.mention}"
     )
 
 
 @bot.command(
     name="dados",
     brief="Tirada de dados poliédricos (ej. !dados 2d8)",
-    help="Introduce tras !dados los dadosque quieras tirar, por ejemplo 1d10 será igual a tirar un dado de diez caras",
+    help="Introduce tras !dados los dadosque quieras tirar, por ejemplo 1d10 "
+    "será igual a tirar un dado de diez caras",
 )
 async def roll(ctx, dados_poliedricos: str):
     dice = [
@@ -97,7 +101,8 @@ async def roll(ctx, dados_poliedricos: str):
 @bot.command(
     name="simple",
     brief="Tirada dado simple (ej. !simple o !simple +5)",
-    help="El bot te mostrará un resultado aleatorio entre 0 y 9 y le sumará el bono introducido",
+    help="El bot te mostrará un resultado aleatorio entre 0 y 9 y le sumará "
+    "el bono introducido",
 )
 async def roll(ctx, *args):
     bono = 0
@@ -118,15 +123,16 @@ async def roll(ctx, *args):
         total_suma = int(dice) - bono
 
     await ctx.send(
-        f"```TOTAL SIMPLE: {total_suma}\nOPERACIÓN: [{dice} {operador} {bono}]\nTIRADA DE DADO: {dice}```{ctx.author.mention}"
+        f"```TOTAL SIMPLE: {total_suma}\nOPERACIÓN: [{dice} {operador} "
+        f"{bono}]\nTIRADA DE DADO: {dice}```{ctx.author.mention}"
     )
 
 
 @bot.command(
     name="pifia",
     brief="Tirada dados de pifia (ej. !pifia 2)",
-    help="Introduce tras !pifia los dados de pifia que quieras tirar, por ejemplo 1 "
-    "será igual a tirar un dado de diez caras",
+    help="Introduce tras !pifia los dados de pifia que quieras tirar, por "
+    "ejemplo 1 será igual a tirar un dado de diez caras",
 )
 async def roll(ctx, dados_pifia: str):
     dice = [
@@ -156,7 +162,8 @@ async def roll(ctx, dados_pifia: str):
 @bot.command(
     name="envejecimiento",
     brief="Tirada de envejecimiento (ej. !envejecimiento -4)",
-    help="Añade el modificador a la tirada de envejecimiento para saber el resultado, por ejemplo !envejecimiento -12",
+    help="Añade el modificador a la tirada de envejecimiento para saber el "
+    "resultado, por ejemplo !envejecimiento -12",
 )
 async def roll(ctx, modificador_envejecimiento: str):
     multiplicador = 1
@@ -186,11 +193,13 @@ async def roll(ctx, modificador_envejecimiento: str):
     elif total_env < 10:
         resultado_env = "La edad aparente aumenta un año."
     elif total_env < 13:
-        resultado_env = "Gana un punto de envejecimiento en cualquier Característica."
+        resultado_env = "Gana un punto de envejecimiento en cualquier "\
+        "Característica."
     elif total_env == 13:
         resultado_env = (
-            "Gana los suficientes puntos de envejecimiento (en cualquier Característica) "
-            "para alcanzar el siguiente nivel en Decrepitud, y sufre una Crisis."
+            "Gana los suficientes puntos de envejecimiento (en cualquier "
+            "Característica) para alcanzar el siguiente nivel en Decrepitud, "
+            "y sufre una Crisis."
         )
     elif total_env == 14:
         resultado_env = "Gana un punto de envejecimiento en Rapidez."
@@ -209,24 +218,29 @@ async def roll(ctx, modificador_envejecimiento: str):
             "Gana un punto de envejecimiento en Destreza y Rapidez."
         )
     elif total_env == 20:
-        resultado_env = "Gana un punto de envejecimiento en Comunicación y Presencia."
+        resultado_env = "Gana un punto de envejecimiento en Comunicación y "\
+        "Presencia."
     elif total_env == 21:
-        resultado_env = "Gana un punto de envejecimiento en Inteligencia y Percepción."
+        resultado_env = "Gana un punto de envejecimiento en Inteligencia y "\
+        "Percepción."
     else:
         resultado_env = (
-            "Gana los suficientes puntos de envejecimiento (en cualquier Característica) "
-            "para alcanzar el siguiente nivel en Decrepitud, y sufre una Crisis."
+            "Gana los suficientes puntos de envejecimiento (en cualquier "
+            "Característica) para alcanzar el siguiente nivel en Decrepitud, "
+            "y sufre una Crisis."
         )
 
     await ctx.send(
-        f"```{resultado_env}\nTOTAL DE ENVEJECIMIENTO: {total_env}\nTIRADAS DE DADOS: {tiradas}```{ctx.author.mention}"
+        f"```{resultado_env}\nTOTAL DE ENVEJECIMIENTO: {total_env}\nTIRADAS "
+        f"DE DADOS: {tiradas}```{ctx.author.mention}"
     )
 
 
 @bot.command(
     name="crisis",
     brief="Tirada de crisis por envejecimiento (ej. !crisis +4)",
-    help="DADO SIMPLE + EDAD/10 (redondeando hacia arriba) + PUNTUACIÓN DECREPITUD",
+    help="DADO SIMPLE + EDAD/10 (redondeando hacia arriba) + PUNTUACIÓN "
+    "DECREPITUD",
 )
 async def roll(ctx, modificador_crisis: str):
     dado_simple = random.choice(range(0, 10))
@@ -236,20 +250,25 @@ async def roll(ctx, modificador_crisis: str):
     elif total_crisis < 15:
         resultado_crisis = "En cama durante un mes."
     elif total_crisis == 15:
-        resultado_crisis = "Enfermedad menor. Tirada de Vitalidad 3+ o CrCo 20 para sobrevivir."
+        resultado_crisis = "Enfermedad menor. Tirada de Vitalidad 3+ o CrCo "\
+        "20 para sobrevivir."
     elif total_crisis == 16:
-        resultado_crisis = "Enfermedad seria. Tirada de Vitalidad 6+ o CrCo 25 para sobrevivir."
+        resultado_crisis = "Enfermedad seria. Tirada de Vitalidad 6+ o CrCo "\
+        "25 para sobrevivir."
     elif total_crisis == 17:
-        resultado_crisis = "Enfermedad grave. Tirada de Vitalidad 9+ o CrCo 30 para sobrevivir."
+        resultado_crisis = "Enfermedad grave. Tirada de Vitalidad 9+ o CrCo "\
+        "30 para sobrevivir."
     elif total_crisis == 18:
-        resultado_crisis = "Enfermedad crítica. Tirada de Vitalidad 12+ o CrCo 35 para sobrevivir."
+        resultado_crisis = "Enfermedad crítica. Tirada de Vitalidad 12+ o "\
+        "CrCo 35 para sobrevivir."
     else:
         resultado_crisis = (
             "Enfermedad terminal. Necesita de CrCo 40 para sobrevivir."
         )
 
     await ctx.send(
-        f"```diff\n-{resultado_crisis}\n\nTOTAL DE CRISIS: {total_crisis}\nTIRADA DE DADOS: {dado_simple}```{ctx.author.mention}"
+        f"```diff\n-{resultado_crisis}\n\nTOTAL DE CRISIS: "
+        f"{total_crisis}\nTIRADA DE DADOS: {dado_simple}```{ctx.author.mention}"
     )
 
 
@@ -257,7 +276,8 @@ async def roll(ctx, modificador_crisis: str):
 @bot.command(
     name="confianza",
     brief="Comprobación de la confianza actual o gasto de confianza",
-    help="El bot mostrará la confianza del último año de la partida o gastará la confianza usada durante una tirada (e.g., !confianza Almasterin -1)",
+    help="El bot mostrará la confianza del último año de la partida o gastará "
+    "la confianza usada durante una tirada (e.g., !confianza Almasterin -1)",
 )
 async def confianza(ctx, *, argumento):
     # Establecer conexión con la base de datos
@@ -290,8 +310,9 @@ async def confianza(ctx, *, argumento):
         # Verifica que el gasto no sea mayor a 1
         if gasto > 1:
             await ctx.send(
-                f"Si no eres Ancaelius, no puedes gastar su confianza de golpe. "
-                "Si eres Ancaelius, ejecuta este comando tantas veces como quieras (bueno hasta tres, todos tenemos límites)."
+                f"Si no eres Ancaelius, no puedes gastar su confianza de "
+                f"golpe. Si eres Ancaelius, ejecuta este comando tantas veces "
+                f"como quieras (bueno hasta tres, todos tenemos límites)."
             )
             connection.close()
             return
@@ -300,7 +321,7 @@ async def confianza(ctx, *, argumento):
         cursor.execute(
             """
             SELECT totales FROM Confianza 
-            WHERE personaje_id = (SELECT id FROM Personajes WHERE nombre = %s) 
+            WHERE personaje_id = (SELECT id FROM Personajes WHERE nombre = %s)
             ORDER BY año DESC
             LIMIT 1
         """,
@@ -324,7 +345,8 @@ async def confianza(ctx, *, argumento):
                SELECT id FROM Personajes WHERE nombre = %s
             ),
             max_year AS (
-                SELECT MAX(año) AS año FROM Confianza WHERE personaje_id = (SELECT id FROM selected_personaje)
+                SELECT MAX(año) AS año FROM Confianza WHERE personaje_id = 
+                (SELECT id FROM selected_personaje)
             )
             UPDATE Confianza
             SET gasto = gasto + %s, totales = totales - %s
@@ -337,7 +359,8 @@ async def confianza(ctx, *, argumento):
         connection.commit()
 
         await ctx.send(
-            f"{personaje}, has gastado {gasto} punto de la confianza de Ancaelius. Úsalo bien."
+            f"{personaje}, has gastado {gasto} punto de la confianza de "
+            f"Ancaelius. Úsalo bien."
         )
 
     else:
@@ -361,7 +384,8 @@ async def confianza(ctx, *, argumento):
             )
         else:
             await ctx.send(
-                f"La confianza total para {personaje} en el último año es {result[0]}."
+                f"La confianza total para {personaje} en el último año "
+                f"es {result[0]}."
             )
 
     # Cierra conexión
