@@ -201,55 +201,39 @@ async def roll_age(ctx, modificador_envejecimiento: str):
             tiradas = tiradas + [resultado]
             break
     total_env = tiradas[-1] * multiplicador
+
     if "-" in modificador_envejecimiento:
-        total_env = total_env - int(
-            modificador_envejecimiento.split("-")[1]
-        )
+        total_env -= int(modificador_envejecimiento.split("-")[1])
     if "+" in modificador_envejecimiento:
-        total_env = total_env + int(
-            modificador_envejecimiento.split("+")[1]
-        )
-    if total_env <= 2:
-        resultado_env = "La edad aparente no aumenta."
-    elif total_env < 10:
-        resultado_env = "La edad aparente aumenta un año."
-    elif total_env < 13:
-        resultado_env = "Gana un punto de envejecimiento en cualquier "\
-        "Característica."
-    elif total_env == 13:
-        resultado_env = (
-            "Gana los suficientes puntos de envejecimiento (en cualquier "
-            "Característica) para alcanzar el siguiente nivel en Decrepitud, "
-            "y sufre una Crisis."
-        )
-    elif total_env == 14:
-        resultado_env = "Gana un punto de envejecimiento en Rapidez."
-    elif total_env == 15:
-        resultado_env = "Gana un punto de envejecimiento en Vitalidad."
-    elif total_env == 16:
-        resultado_env = "Gana un punto de envejecimiento en Percepcion."
-    elif total_env == 17:
-        resultado_env = "Gana un punto de envejecimiento en Presencia."
-    elif total_env == 18:
-        resultado_env = (
-            "Gana un punto de envejecimiento en Fuerza y Vitalidad."
-        )
-    elif total_env == 19:
-        resultado_env = (
-            "Gana un punto de envejecimiento en Destreza y Rapidez."
-        )
-    elif total_env == 20:
-        resultado_env = "Gana un punto de envejecimiento en Comunicación y "\
-        "Presencia."
-    elif total_env == 21:
-        resultado_env = "Gana un punto de envejecimiento en Inteligencia y "\
-        "Percepción."
-    else:
-        resultado_env = (
-            "Gana los suficientes puntos de envejecimiento (en cualquier "
-            "Característica) para alcanzar el siguiente nivel en Decrepitud, "
-            "y sufre una Crisis."
-        )
+        total_env += int(modificador_envejecimiento.split("+")[1])
+
+    # Diccionario de resultados
+    resultados = {
+        2: "La edad aparente no aumenta.",
+        3: "La edad aparente aumenta un año.",
+        9: "Gana un punto de envejecimiento en cualquier Característica.",
+        12: "Gana los suficientes puntos de envejecimiento (en cualquier "
+             "Característica) para alcanzar el siguiente nivel en Decrepitud, "
+             "y sufre una Crisis.",
+        13: "Gana un punto de envejecimiento en Rapidez.",
+        14: "Gana un punto de envejecimiento en Vitalidad.",
+        15: "Gana un punto de envejecimiento en Percepcion.",
+        16: "Gana un punto de envejecimiento en Presencia.",
+        17: "Gana un punto de envejecimiento en Fuerza y Vitalidad.",
+        18: "Gana un punto de envejecimiento en Destreza y Rapidez.",
+        19: "Gana un punto de envejecimiento en Comunicación y Presencia.",
+        20: "Gana un punto de envejecimiento en Inteligencia y Percepción.",
+        21: "Gana los suficientes puntos de envejecimiento (en cualquier "
+             "Característica) para alcanzar el siguiente nivel en Decrepitud, "
+             "y sufre una Crisis."
+    }
+
+    # Find the right response
+    resultado_env = "La edad aparente no aumenta."
+    for clave in sorted(resultados.keys(), reverse=True):
+        if total_env >= clave:
+            resultado_env = resultados[clave]
+            break
 
     await ctx.send(
         f"```{resultado_env}\nTOTAL DE ENVEJECIMIENTO: {total_env}\nTIRADAS "
