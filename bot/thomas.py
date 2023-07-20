@@ -289,58 +289,63 @@ async def confianza(ctx, *, argumento):
     # Cursor para interactuar con la BBDD
     cursor = connection.cursor()
 
+    # Añadimos roles que puedan ejecutar el comando
+    allowed_roles = ["Administri", "Máximo Poder"]
     if argumento.lower() == 'avance':
-        # Solicita confirmación
-        await ctx.send("¿Estás seguro de que deseas avanzar al siguiente año? "
-                       "Responde con 'sí' para confirmar.")
+        if any(role.name in allowed_roles for role in ctx.author.roles):
+            # Solicita confirmación
+            await ctx.send("¿Estás seguro de que deseas avanzar al siguiente año? "
+                        "Responde con 'sí' para confirmar.")
 
-        def check(m):
-            return m.content.lower() == 'sí' and m.channel == ctx.channel and \
-                m.author == ctx.author
+            def check(m):
+                return m.content.lower() == 'sí' and m.channel == ctx.channel and \
+                    m.author == ctx.author
 
-        try:
-            confirmacion = await bot.wait_for('message', timeout=10.0,
-                                              check=check)
-        except asyncio.TimeoutError:
-            await ctx.send("No se ha confirmado el avance al año siguiente. "
-                           "Operación cancelada.")
-        
-        else:
-            cursor.execute("SELECT MAX(año) FROM Confianza")
-            año_actual = cursor.fetchone()[0]
+            try:
+                confirmacion = await bot.wait_for('message', timeout=10.0,
+                                                check=check)
+            except asyncio.TimeoutError:
+                await ctx.send("No se ha confirmado el avance al año siguiente. "
+                            "Operación cancelada.")
+                connection.close()
 
-            if año_actual is not None:
-                año_siguiente = año_actual + 1
-
-                cursor.execute("SELECT setval('confianza_id_seq', "
-                               "(SELECT MAX(id) FROM confianza))")
-
-                cursor.execute("""
-                    INSERT INTO Confianza (personaje_id, año, anuales,
-                               resumenes, otros, gasto, totales)
-                    SELECT personaje_id, %s, NULL, NULL, NULL, NULL, NULL
-                    FROM Confianza
-                    WHERE año = %s
-                """, (año_siguiente, año_actual))
-
-                connection.commit()
-
-                cursor.execute("""
-                    UPDATE Confianza c1
-                    SET iniciales = c2.totales, 
-                    totales = c2.totales
-                    FROM Confianza c2
-                    WHERE c1.personaje_id = c2.personaje_id
-                    AND c1.año = %s
-                    AND c2.año = %s
-                """, (año_siguiente, año_actual))
-
-                connection.commit()
-
-                await ctx.send(f"El año ha avanzado a {año_siguiente}.")
             else:
-                await ctx.send("No hay datos de año en la tabla de confianza.")
-        
+                cursor.execute("SELECT MAX(año) FROM Confianza")
+                año_actual = cursor.fetchone()[0]
+
+                if año_actual is not None:
+                    año_siguiente = año_actual + 1
+
+                    cursor.execute("SELECT setval('confianza_id_seq', "
+                                "(SELECT MAX(id) FROM confianza))")
+
+                    cursor.execute("""
+                        INSERT INTO Confianza (personaje_id, año, anuales,
+                                resumenes, otros, gasto, totales)
+                        SELECT personaje_id, %s, NULL, NULL, NULL, NULL, NULL
+                        FROM Confianza
+                        WHERE año = %s
+                    """, (año_siguiente, año_actual))
+
+                    connection.commit()
+
+                    cursor.execute("""
+                        UPDATE Confianza c1
+                        SET iniciales = c2.totales, 
+                        totales = c2.totales
+                        FROM Confianza c2
+                        WHERE c1.personaje_id = c2.personaje_id
+                        AND c1.año = %s
+                        AND c2.año = %s
+                    """, (año_siguiente, año_actual))
+
+                    connection.commit()
+
+                    await ctx.send(f"El año ha avanzado a {año_siguiente}.")
+                else:
+                    await ctx.send("No hay datos de año en la tabla de confianza.")
+        else:
+            await ctx.send("No tienes permiso para utilizar este comando.")
         connection.close()
         return
 
