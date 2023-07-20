@@ -462,8 +462,8 @@ async def confianza(ctx, *, argumento):
 
         connection.commit()
 
-        await ctx.send(f"Se añadieron {gasto} puntos de confianza al personaje"
-                       f" {personaje}.")
+        await ctx.send(f"Se añadieron {gasto} punto(s) de confianza al "
+                       f"personaje {personaje}.")
 
     else:
         # Realiza la consulta SQL
