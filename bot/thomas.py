@@ -294,19 +294,19 @@ async def confianza(ctx, *, argumento):
     if argumento.lower() == 'avance':
         if any(role.name in allowed_roles for role in ctx.author.roles):
             # Solicita confirmación
-            await ctx.send("¿Estás seguro de que deseas avanzar al siguiente año? "
-                        "Responde con 'sí' para confirmar.")
+            await ctx.send("¿Estás seguro de que deseas avanzar al siguiente "
+                           "año? Responde con 'sí' para confirmar.")
 
             def check(m):
-                return m.content.lower() == 'sí' and m.channel == ctx.channel and \
-                    m.author == ctx.author
+                return m.content.lower() == 'sí' and m.channel == ctx.channel \
+                    and m.author == ctx.author
 
             try:
                 confirmacion = await bot.wait_for('message', timeout=10.0,
                                                 check=check)
             except asyncio.TimeoutError:
-                await ctx.send("No se ha confirmado el avance al año siguiente. "
-                            "Operación cancelada.")
+                await ctx.send("No se ha confirmado el avance al año "
+                               "siguiente. Operación cancelada.")
                 connection.close()
 
             else:
@@ -343,7 +343,8 @@ async def confianza(ctx, *, argumento):
 
                     await ctx.send(f"El año ha avanzado a {año_siguiente}.")
                 else:
-                    await ctx.send("No hay datos de año en la tabla de confianza.")
+                    await ctx.send("No hay datos de año en la tabla de "
+                                   "confianza.")
         else:
             await ctx.send("No tienes permiso para utilizar este comando.")
         connection.close()
