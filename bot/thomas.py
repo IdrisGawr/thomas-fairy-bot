@@ -1,3 +1,8 @@
+"""
+Thomas Module
+Ars Magica 5ed Bot
+"""
+
 import asyncio
 import os
 import random
@@ -15,17 +20,23 @@ USERNAME = os.getenv("POSTGRES_USERNAME")
 PASSWORD = os.getenv("POSTGRES_PASSWORD")
 
 client = discord.Client()
-member = discord.Member
+Member = discord.Member
 bot = commands.Bot(command_prefix="!")
 
 
 @bot.event
 async def on_ready():
+    """
+    Print connect to Discord
+    """
     print(f"{bot.user.name} has connected to Discord!")
 
 
 @bot.event
 async def on_command_error(ctx, error):
+    """
+    Handle possible errors
+    """
     await ctx.send(f"An error occurred: {str(error)}")
 
 
@@ -35,7 +46,10 @@ async def on_command_error(ctx, error):
     help="El bot te mostrará un resultado aleatorio entre 0 y 9 y le sumará "
     "el bono introducido",
 )
-async def roll(ctx, *args):
+async def roll_stress(ctx, *args):
+    """
+    Roll a stress d10 dice assuming Ars Magica 5ed rules
+    """
     multiplicador = 1
     tiradas = []
     bono = 0
@@ -85,7 +99,10 @@ async def roll(ctx, *args):
     help="Introduce tras !dados los dadosque quieras tirar, por ejemplo 1d10 "
     "será igual a tirar un dado de diez caras",
 )
-async def roll(ctx, dados_poliedricos: str):
+async def roll_poly(ctx, dados_poliedricos: str):
+    """
+    Roll a set of polyhedral dices
+    """
     dice = [
         str(
             random.choice(
@@ -105,7 +122,10 @@ async def roll(ctx, dados_poliedricos: str):
     help="El bot te mostrará un resultado aleatorio entre 0 y 9 y le sumará "
     "el bono introducido",
 )
-async def roll(ctx, *args):
+async def roll_simple(ctx, *args):
+    """
+    Roll a simple d10 dice
+    """
     bono = 0
     operador = "+"
     for arg in args:
@@ -135,7 +155,10 @@ async def roll(ctx, *args):
     help="Introduce tras !pifia los dados de pifia que quieras tirar, por "
     "ejemplo 1 será igual a tirar un dado de diez caras",
 )
-async def roll(ctx, dados_pifia: str):
+async def roll_pifia(ctx, dados_pifia: str):
+    """
+    Roll a set of pifia dice(s) following Ars Magica 5ed rules
+    """
     dice = [
         str(random.choice(range(0, 10)))
         for _ in range(int(dados_pifia))
@@ -143,8 +166,8 @@ async def roll(ctx, dados_pifia: str):
     dice.sort()
     pifias = 0
     has_pifiado = ""
-    for d in dice:
-        if d == "0":
+    for number in dice:
+        if number == "0":
             pifias += 1
             has_pifiado = "*** ¡PIFIASTE! ***\n\n"
         else:
@@ -166,7 +189,10 @@ async def roll(ctx, dados_pifia: str):
     help="Añade el modificador a la tirada de envejecimiento para saber el "
     "resultado, por ejemplo !envejecimiento -12",
 )
-async def roll(ctx, modificador_envejecimiento: str):
+async def roll_age(ctx, modificador_envejecimiento: str):
+    """
+    Roll a d10 dice following Ars Magica 5ed rules
+    """
     multiplicador = 1
     tiradas = []
     while True:
@@ -243,7 +269,10 @@ async def roll(ctx, modificador_envejecimiento: str):
     help="DADO SIMPLE + EDAD/10 (redondeando hacia arriba) + PUNTUACIÓN "
     "DECREPITUD",
 )
-async def roll(ctx, modificador_crisis: str):
+async def roll_crisis(ctx, modificador_crisis: str):
+    """
+    Roll a d10 crisis dice following Ars Magica 5ed rules
+    """
     dado_simple = random.choice(range(0, 10))
     total_crisis = int(modificador_crisis.split("+")[1]) + dado_simple
     if total_crisis <= 8:
@@ -281,6 +310,9 @@ async def roll(ctx, modificador_crisis: str):
     "la confianza usada durante una tirada (e.g., !confianza Almasterin -1)",
 )
 async def confianza(ctx, *, argumento):
+    """
+    Define confidence operations in the Database
+    """
     # Establecer conexión con la base de datos
     connection = psycopg2.connect(
         host=IP, database=DATABASE, user=USERNAME, password=PASSWORD
@@ -297,12 +329,12 @@ async def confianza(ctx, *, argumento):
             await ctx.send("¿Estás seguro de que deseas avanzar al siguiente "
                            "año? Responde con 'sí' para confirmar.")
 
-            def check(m):
-                return m.content.lower() == 'sí' and m.channel == ctx.channel \
-                    and m.author == ctx.author
+            def check(answer):
+                return answer.content.lower() == 'sí' and answer.channel == \
+                    ctx.channel and answer.author == ctx.author
 
             try:
-                confirmacion = await bot.wait_for('message', timeout=10.0,
+                _ = await bot.wait_for('message', timeout=10.0,
                                                 check=check)
             except asyncio.TimeoutError:
                 await ctx.send("No se ha confirmado el avance al año "
@@ -382,9 +414,9 @@ async def confianza(ctx, *, argumento):
         # Verifica que el gasto no sea mayor a 1
         if gasto > 1:
             await ctx.send(
-                f"Si no eres Ancaelius, no puedes gastar su confianza de "
-                f"golpe. Si eres Ancaelius, ejecuta este comando tantas veces "
-                f"como quieras (bueno hasta tres, todos tenemos límites)."
+                "Si no eres Ancaelius, no puedes gastar su confianza de "
+                "golpe. Si eres Ancaelius, ejecuta este comando tantas veces "
+                "como quieras (bueno hasta tres, todos tenemos límites)."
             )
             connection.close()
             return
@@ -392,7 +424,7 @@ async def confianza(ctx, *, argumento):
         # Realiza la consulta SQL para obtener confianza actual
         cursor.execute(
             """
-            SELECT totales FROM Confianza 
+            SELECT totales FROM Confianza
             WHERE personaje_id = (SELECT id FROM Personajes WHERE nombre = %s)
             ORDER BY año DESC
             LIMIT 1
@@ -453,10 +485,11 @@ async def confianza(ctx, *, argumento):
                 (SELECT id FROM selected_personaje)
             )
             UPDATE Confianza
-            SET {} = COALESCE({}, 0) + %s, totales = COALESCE(totales, 0) + %s
+            SET {column} = COALESCE({column}, 0) + %s, totales =
+            COALESCE(totales, 0) + %s
             WHERE año = (SELECT año FROM max_year)
             AND personaje_id = (SELECT id FROM selected_personaje)
-        """.format(columna, columna)
+        """.format(column=columna)
 
         cursor.execute(query, (personaje, gasto, gasto))
 
