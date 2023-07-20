@@ -66,26 +66,20 @@ async def roll_stress(ctx, *args):
         else:
             tiradas = tiradas + [resultado]
             break
+
     total_stress = tiradas[-1] * multiplicador
+
     for arg in args:
-        if "-" in arg:
-            operador = "-"
-        if arg is None:
-            bono = 0
-        else:
+        if arg is not None:
+            operador = "-" if "-" in arg else operador
             bono = int(arg.replace(" ", "").split(operador)[1])
 
-    if operador == "+":
-        total_suma = bono + int(total_stress)
-    else:
-        total_suma = int(total_stress) - bono
+    total_suma = bono + int(total_stress) if operador == "+" \
+        else int(total_stress) - bono
 
-    if 0 in tiradas:
-        dice = "***¡POSIBLE PIFIA!***\n\n"
-    elif 1 in tiradas:
-        dice = "***¡CRÍTICO!***\n\n"
-    else:
-        dice = ""
+    dice = "***¡POSIBLE PIFIA!***\n\n" if 0 in tiradas \
+        else "***¡CRÍTICO!***\n\n" if 1 in tiradas else ""
+
     await ctx.send(
         f"```ini\n{dice}TOTAL DE ESTRÉS: {total_suma}\nOPERACIÓN: "
         f"[{total_stress} {operador} {bono}]\nTIRADAS DE DADOS: "
