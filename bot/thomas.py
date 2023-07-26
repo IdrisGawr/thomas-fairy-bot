@@ -369,7 +369,7 @@ async def confianza(ctx, *, argumento):
         gasto_str = argumentos[-1]
         personaje = ' '.join(argumentos[:-2])
         columna = argumentos[-2]
-        if columna not in ["anuales", "resúmenes", "otros"]:
+        if columna not in ["anuales", "resumenes", "otros"]:
             await ctx.send(f"Columna no válida: {columna}.")
             connection.close()
             return
